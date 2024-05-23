@@ -11,22 +11,22 @@ from tqdm import tqdm
 
 #TARGETS WE WILL EVENTUALLY TRY TO PREDICT
 
-yield_stress = np.linspace(2.5E5, 2.5E6, num=5) #yield stress (pascals)
-slip_yield_stress = np.linspace(5E4, 5E5, num=5) #slip yield stress (pascals)
-Beta = np.linspace(5E-11, 5E-9, num=4) #slip velocity coefficient
-thinning_index = np.linspace(0.5, 0.8, num=4) #shear thinning index
-Viscosity_consistency = np.linspace(800, 1300, num=4) #shear thinning consistency (pa.s^n)
+yield_stress = np.array([5E4]) #yield stress (pascals)
+slip_yield_stress = np.array([5E3]) #slip yield stress (pascals)
+Beta = np.array([5E-10]) #slip velocity coefficient
+thinning_index = np.array([0.67]) #shear thinning index
+Viscosity_consistency = np.array([1100]) #shear thinning consistency (pa.s^n)
 
 
 #initial conditions:
 
-Diameter = np.array([0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.5, 1.5, 1.5])*10**-3 #diameter (meters)
+Diameter = np.linspace(0.5, 1.5, 50)*10**-3 #diameter (meters)
 Radius = Diameter/2 #radius (meters)
 
-aspectRatio = np.array([ 10, 20, 30, 10, 20, 30, 10, 15, 20]) #aspect ratio L/D
+aspectRatio = np.linspace(10,100, 50) #aspect ratio L/D
 Length = Diameter*aspectRatio #length (meters)
 
-G = np.linspace(1.5E10, 1.14E11, 5) #pressure gradient array (pascals/meter)
+G = np.linspace(3.33E8, 6.67E9, 50) #pressure gradient array (pascals/meter)
 
 
 iterations = len(yield_stress)*len(slip_yield_stress)*len(Beta)*len(thinning_index)*len(Viscosity_consistency)*len(Radius)*len(G)
@@ -38,6 +38,7 @@ print("Total iterations: ", iterations)
 #empty array to store the data
 stored_theory_values = np.array([])
 stored_target_values = np.array([])
+stored_target_values_2 = np.array([])
 
 
 #calculate the apparent wall shear rate (gamma_dot_apparent) for each case
@@ -62,7 +63,7 @@ for g_i in tqdm(G):
                 for beta in Beta:
                     #slip velocity (m/s)
                     if tw > tys:
-                        vs0 = beta*tw
+                        vs0 = beta*(tw-tys)
                     else:
                         vs0 = 0
 
@@ -92,13 +93,17 @@ for g_i in tqdm(G):
 
                             temp_theorydata = np.array([Radius[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot])
 
-                            temp_target_data = np.array([beta, n, k, tys, ty])
+                            temp_target_data = np.array([Qslip, Qplug])
+
+                            temp_target_data_2 = np.array([ty, tys, beta, n, k])
 
                             #store the theoretical data from each iteration in a matrix (turn into a pandas dataframe later)
                             stored_theory_values = np.concatenate((stored_theory_values, temp_theorydata), axis = 0)
 
                             #store the target values from each iteration in a matrix (turn into a pandas dataframe later)
                             stored_target_values = np.concatenate((stored_target_values, temp_target_data), axis = 0)
+
+                            stored_target_values_2 = np.concatenate((stored_target_values_2, temp_target_data_2), axis = 0)
 
 
 
@@ -112,11 +117,26 @@ Theory_Data = pd.DataFrame(stored_theory_values, columns = ['Radius (m)', 'Aspec
 #save the data to a csv file
 Theory_Data.to_csv('Theory_Data.csv', index = False)
 
+
+
+
 #reshape the target data into a matrix
-stored_target_values = np.reshape(stored_target_values, (iterations, 5))
+stored_target_values = np.reshape(stored_target_values, (iterations, 2))
 
 #convert the stored data into a pandas dataframe
-Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Velocity Coefficient', 'Shear Thinning Index', 'Shear Thinning Consistency (Pa s^n)', 'Slip Yield Stress (Pa)', 'Yield Stress (Pa)'])
+Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Flow Rate (m^3 s^-1)', 'Plug Flow Rate (m^3 s^-1)'])
 
 #save the data to a csv file
 Target_Data.to_csv('Target_Data.csv', index = False)
+
+
+
+
+#reshape the target data into a matrix
+stored_target_values_2 = np.reshape(stored_target_values_2, (iterations, 5))
+
+#convert the stored data into a pandas dataframe
+Target_Data_2 = pd.DataFrame(stored_target_values_2, columns = ['Yield Stress (Pa)', 'Slip Yield Stress (Pa)', 'Beta', 'Shear Thinning Index', 'Viscosity Consistency (Pa s^n)'])
+
+#save the data to a csv file
+Target_Data_2.to_csv('Target_Data_2.csv', index = False)
