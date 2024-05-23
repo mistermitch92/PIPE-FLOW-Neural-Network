@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 #TARGETS WE WILL EVENTUALLY TRY TO PREDICT
 
-yield_stress = np.linspace(2.5E4, 2.5E5, num=10) #yield stress (pascals)
-slip_yield_stress = np.linspace(5E4, 5E5, num=10) #slip yield stress (pascals)
+yield_stress = np.linspace(2.5E5, 2.5E6, num=5) #yield stress (pascals)
+slip_yield_stress = np.linspace(5E4, 5E5, num=5) #slip yield stress (pascals)
 Beta = np.linspace(5E-11, 5E-9, num=4) #slip velocity coefficient
 thinning_index = np.linspace(0.5, 0.8, num=4) #shear thinning index
 Viscosity_consistency = np.linspace(800, 1300, num=4) #shear thinning consistency (pa.s^n)
@@ -92,7 +92,7 @@ for g_i in tqdm(G):
 
                             temp_theorydata = np.array([Radius[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot])
 
-                            temp_target_data = np.array([beta, n, k, Qslip, Qplug])
+                            temp_target_data = np.array([beta, n, k, tys, ty])
 
                             #store the theoretical data from each iteration in a matrix (turn into a pandas dataframe later)
                             stored_theory_values = np.concatenate((stored_theory_values, temp_theorydata), axis = 0)
@@ -116,7 +116,7 @@ Theory_Data.to_csv('Theory_Data.csv', index = False)
 stored_target_values = np.reshape(stored_target_values, (iterations, 5))
 
 #convert the stored data into a pandas dataframe
-Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Velocity Coefficient', 'Shear Thinning Index', 'Shear Thinning Consistency (Pa s^n)', 'Slip Volumetric Flow Rate (m^3 s^-1)', 'Plug Volumetric Flow Rate (m^3 s^-1)'])
+Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Velocity Coefficient', 'Shear Thinning Index', 'Shear Thinning Consistency (Pa s^n)', 'Slip Yield Stress (Pa)', 'Yield Stress (Pa)'])
 
 #save the data to a csv file
 Target_Data.to_csv('Target_Data.csv', index = False)
