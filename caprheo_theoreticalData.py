@@ -33,13 +33,12 @@ iterations = len(yield_stress)*len(slip_yield_stress)*len(Beta)*len(thinning_ind
 print("Total iterations: ", iterations)
 
 
+#initialize the matrix to store the theoretical data
+stored_theory_values = np.zeros((iterations, 7))
+stored_target_values = np.zeros((iterations, 2))
+stored_target_values_2 = np.zeros((iterations, 5))
 
-
-#empty array to store the data
-stored_theory_values = np.array([])
-stored_target_values = np.array([])
-stored_target_values_2 = np.array([])
-
+counter = 0
 
 #calculate the apparent wall shear rate (gamma_dot_apparent) for each case
 for g_i in tqdm(G):
@@ -79,6 +78,7 @@ for g_i in tqdm(G):
                             else:
                                 v0 = 0
 
+                            #FINAL CALCS FOR EACH SET OF PARAMETERS
                             #volumetric flow rate from slip (m^3/s)
                             Qslip = np.pi*Radius[ii]**2*vs0*(1-delta/Radius[ii])
 
@@ -91,25 +91,22 @@ for g_i in tqdm(G):
                             #apparent wall shear rate (1/s)
                             gamma_dot_apparent = 4*Qtot/(np.pi*Radius[ii]**3)
 
-                            temp_theorydata = np.array([Radius[ii], L[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot])
 
-                            temp_target_data = np.array([Qslip, Qplug])
 
-                            temp_target_data_2 = np.array([ty, tys, beta, n, k])
+                            #STORE THE DATA
 
                             #store the theoretical data from each iteration in a matrix (turn into a pandas dataframe later)
-                            stored_theory_values = np.concatenate((stored_theory_values, temp_theorydata), axis = 0)
+                            stored_theory_values[counter, :] = [Radius[ii], Length[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot]
 
-                            #store the target values from each iteration in a matrix (turn into a pandas dataframe later)
-                            stored_target_values = np.concatenate((stored_target_values, temp_target_data), axis = 0)
+                            #store the first set of target values from each iteration in a matrix (turn into a pandas dataframe later)
+                            stored_target_values[counter,:] = [Qslip, Qplug]
 
-                            stored_target_values_2 = np.concatenate((stored_target_values_2, temp_target_data_2), axis = 0)
+                            #store the second set of target values from each iteration in a matrix (turn into a pandas dataframe later)
+                            stored_target_values_2[counter,:] = [ty, tys, beta, n, k]
+
+                            counter = counter +1
 
 
-
-
-#reshape the stored data into a matrix
-stored_theory_values = np.reshape(stored_theory_values, (iterations, len(temp_theorydata)))
 
 #convert the stored data into a pandas dataframe
 Theory_Data = pd.DataFrame(stored_theory_values, columns = ['Radius (m)', 'Length (m)','Aspect Ratio', 'Pressure Drop (Pa)', 'Pressure Gradient(Pa m^-1)', 'Apparent Wall Shear Rate (s^-1)', 'Volumetric Flow Rate (m^3 s^-1)'])
@@ -119,10 +116,6 @@ Theory_Data.to_csv('Theory_Data.csv', index = False)
 
 
 
-
-#reshape the target data into a matrix
-stored_target_values = np.reshape(stored_target_values, (iterations, len(temp_target_data)))
-
 #convert the stored data into a pandas dataframe
 Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Flow Rate (m^3 s^-1)', 'Plug Flow Rate (m^3 s^-1)'])
 
@@ -130,10 +123,6 @@ Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Flow Rate (m^3
 Target_Data.to_csv('Target_Data.csv', index = False)
 
 
-
-
-#reshape the target data into a matrix
-stored_target_values_2 = np.reshape(stored_target_values_2, (iterations, len(temp_target_data_2)))
 
 #convert the stored data into a pandas dataframe
 Target_Data_2 = pd.DataFrame(stored_target_values_2, columns = ['Yield Stress (Pa)', 'Slip Yield Stress (Pa)', 'Beta', 'Shear Thinning Index', 'Viscosity Consistency (Pa s^n)'])
