@@ -91,7 +91,7 @@ for g_i in tqdm(G):
                             #apparent wall shear rate (1/s)
                             gamma_dot_apparent = 4*Qtot/(np.pi*Radius[ii]**3)
 
-                            temp_theorydata = np.array([Radius[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot])
+                            temp_theorydata = np.array([Radius[ii], L[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot])
 
                             temp_target_data = np.array([Qslip, Qplug])
 
@@ -109,10 +109,10 @@ for g_i in tqdm(G):
 
 
 #reshape the stored data into a matrix
-stored_theory_values = np.reshape(stored_theory_values, (iterations, 6))
+stored_theory_values = np.reshape(stored_theory_values, (iterations, len(temp_theorydata)))
 
 #convert the stored data into a pandas dataframe
-Theory_Data = pd.DataFrame(stored_theory_values, columns = ['Radius (m)', 'Aspect Ratio', 'Pressure Drop (Pa)', 'Pressure Gradient(Pa m^-1)', 'Apparent Wall Shear Rate (s^-1)', 'Volumetric Flow Rate (m^3 s^-1)'])
+Theory_Data = pd.DataFrame(stored_theory_values, columns = ['Radius (m)', 'Length (m)','Aspect Ratio', 'Pressure Drop (Pa)', 'Pressure Gradient(Pa m^-1)', 'Apparent Wall Shear Rate (s^-1)', 'Volumetric Flow Rate (m^3 s^-1)'])
 
 #save the data to a csv file
 Theory_Data.to_csv('Theory_Data.csv', index = False)
@@ -121,7 +121,7 @@ Theory_Data.to_csv('Theory_Data.csv', index = False)
 
 
 #reshape the target data into a matrix
-stored_target_values = np.reshape(stored_target_values, (iterations, 2))
+stored_target_values = np.reshape(stored_target_values, (iterations, len(temp_target_data)))
 
 #convert the stored data into a pandas dataframe
 Target_Data = pd.DataFrame(stored_target_values, columns = ['Slip Flow Rate (m^3 s^-1)', 'Plug Flow Rate (m^3 s^-1)'])
@@ -133,7 +133,7 @@ Target_Data.to_csv('Target_Data.csv', index = False)
 
 
 #reshape the target data into a matrix
-stored_target_values_2 = np.reshape(stored_target_values_2, (iterations, 5))
+stored_target_values_2 = np.reshape(stored_target_values_2, (iterations, len(temp_target_data_2)))
 
 #convert the stored data into a pandas dataframe
 Target_Data_2 = pd.DataFrame(stored_target_values_2, columns = ['Yield Stress (Pa)', 'Slip Yield Stress (Pa)', 'Beta', 'Shear Thinning Index', 'Viscosity Consistency (Pa s^n)'])
