@@ -35,7 +35,7 @@ print("Total iterations: ", iterations)
 
 #initialize the matrix to store the theoretical data
 stored_theory_values = np.zeros((iterations, 8))
-stored_target_values = np.zeros((iterations, 1))
+stored_target_values = np.zeros((iterations, 2))
 stored_target_values_2 = np.zeros((iterations, 3))
 
 counter = 0
@@ -99,7 +99,7 @@ for g_i in tqdm(G):
                             stored_theory_values[counter, :] = [Radius[ii], aspectRatio[ii], dP, g_i, gamma_dot_apparent, Qtot, n, k]
 
                             #store the first set of target values from each iteration in a matrix (turn into a pandas dataframe later)
-                            stored_target_values[counter,:] = [Qplug]
+                            stored_target_values[counter,:] = [Qplug, Qslip]
 
                             #store the second set of target values from each iteration in a matrix (turn into a pandas dataframe later)
                             stored_target_values_2[counter,:] = [ty, tys, beta]
@@ -118,7 +118,7 @@ Theory_Data.to_csv('Theory_Data.csv', index = False)
 
 
 #convert the stored data into a pandas dataframe
-Target_Data = pd.DataFrame(stored_target_values, columns = ['Plug Flow Rate (m^3 s^-1)'])
+Target_Data = pd.DataFrame(stored_target_values, columns = ['Plug Flow Rate (m^3 s^-1)', 'Slip Flow Rate (m^3 s^-1)'])
 
 #save the data to a csv file
 Target_Data.to_csv('Target_Data.csv', index = False)
